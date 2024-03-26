@@ -11,3 +11,5 @@ Echter, er is een uitdaging: een robotarm (Xarm) zal proberen de robots tegen te
 Een van de belangrijkste voordelen van deze aanpak is dat we nu veel meer bezoekers kunnen verwelkomen in vergelijking met de vorige editie van 2023.
 Een tweede demonstratie omvat onze Nao Robot. Dankzij de recente ontwikkelingen op het gebied van generatieve kunstmatige intelligentie kan Nao nu echt converseren met de bezoekers in hun eigen taal, waaronder Nederlands, Frans en Engels. Daarnaast zullen diverse interacties worden gepresenteerd waardoor NAO menselijke gedragingen kan nabootsen.
 Dankzij deze demonstraties zijn we in staat om continu en gelijktijdig vele bezoekers bij onze stand te bedienen en hen te verbazen met de interactie tussen mens en robotica & kunstmatige intelligentie.
+
+Om te starten ga naar :  https://www.ufactory.cc/ufactory-studio/  en download Ufactory studio.
