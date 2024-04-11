@@ -1,11 +1,13 @@
-// NeoPixel Ring rainbow sketch (c) 2013 Shae Erisson
-// Released under the GPLv3 license to match the rest of the
-// Adafruit NeoPixel library
-
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
+
+int pariental[2] = {0, 7};
+int temporalLeft[2] = {8, 15};
+int temporalRight[2] = {16, 23};
+int temporal[2] = {8, 23};
+int frontal[2] = {24, 31};
 
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN        D6 // On Trinket or Gemma, suggest changing this to 1
@@ -19,7 +21,7 @@
 // strandtest example for more information on possible values.
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-#define DELAYVAL 50 // Time (in milliseconds) to pause between pixels
+#define DELAYVAL 500 // Time (in milliseconds) to pause between pixels
 
 void setup() {
   // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
@@ -32,28 +34,31 @@ void setup() {
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
 }
 
-void loop() {
-  for (int i = 0; i < 256; i++) {
-    for (int j = 0; j < NUMPIXELS; j++) {
-      // Each LED gets a different color based on its position
-      pixels.setPixelColor(j, Wheel((i + j * 256 / NUMPIXELS) & 255));
+void setPixelsFade(int pixelPos[2], uint32_t startColor, uint32_t endColor, int transitionTime) {
+  int steps = 50;
+  int wait = transitionTime / steps;
+
+  for (int i = 0; i <= steps; i++) {
+    int r = map(i, 0, steps, (startColor >> 16) & 0xFF, (endColor >> 16) & 0xFF);
+    int g = map(i, 0, steps, (startColor >> 8) & 0xFF, (endColor >> 8) & 0xFF);
+    int b = map(i, 0, steps, startColor & 0xFF, endColor & 0xFF);
+
+    uint32_t newColor = pixels.Color(r, g, b);
+
+    for (int j = pixelPos[0]; j <= pixelPos[1]; j++) {
+      pixels.setPixelColor(j, newColor);
     }
+
     pixels.show();
-    delay(DELAYVAL);
+    delay(wait);
   }
 }
 
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if (WheelPos < 85) {
-    return pixels.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if (WheelPos < 170) {
-    WheelPos -= 85;
-    return pixels.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+void loop() {
+  setPixelsFade(frontal, pixels.Color(0, 0, 255), pixels.Color(0, 0, 50), DELAYVAL);
+  delay(1000);
+  setPixelsFade(temporal, pixels.Color(0, 255, 0), pixels.Color(0, 50, 0), DELAYVAL);
+  delay(1000);
+  setPixelsFade(pariental, pixels.Color(255, 0, 0), pixels.Color(50, 0, 0), DELAYVAL);
+  delay(1000);
 }
