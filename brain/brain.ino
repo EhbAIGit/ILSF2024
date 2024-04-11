@@ -3,6 +3,7 @@ This code controls a NeoPixel strip to simulate the activity of different brain 
 It listens for serial commands ('f' for frontal, 't' for temporal, 'p' for parietal) and changes the color of the corresponding LED zone gradually, 
 creating a smooth transition effect. 
 The loop continuously checks for incoming serial commands and executes the corresponding action based on the received command.
+When no command is send for 30 seconds it goes to demo mode.
 **/
 
 
@@ -25,6 +26,10 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 int frontal[2] = {24, 31};
 int temporal[2] = {8, 23};
 int parietal[2] = {0, 7};
+
+unsigned long lastCommandTime = 0; // Variable to store the time of the last command
+unsigned long demoStartTime = 0;   // Variable to store the start time of the demo mode
+const unsigned long demoInterval = 30000; // 30 seconds
 
 void setup() {
   pixels.begin();
@@ -52,7 +57,11 @@ void setPixelsFade(int pixelPos[2], uint32_t startColor, uint32_t endColor, int 
 }
 
 void loop() {
+  unsigned long currentTime = millis(); // Get the current time
+
+  // Check if serial data is available
   if (Serial.available() > 0) {
+    lastCommandTime = currentTime; // Update the time of the last command
     char command = Serial.read();
     switch (command) {
       case 'f': // Frontal zone
@@ -67,6 +76,29 @@ void loop() {
       default:
         // Invalid command
         break;
+    }
+  }
+
+  // Check if it's time to enter demo mode
+  if (currentTime - lastCommandTime >= demoInterval) {
+    if (demoStartTime == 0) {
+      demoStartTime = currentTime; // Start the demo mode timer
+    }
+
+    // Calculate the time elapsed since demo mode started
+    unsigned long demoElapsedTime = currentTime - demoStartTime;
+
+    // Determine which brain zone to display based on the elapsed time
+    if (demoElapsedTime < 10000) { // 10 seconds for each zone
+      setPixelsFade(frontal, pixels.Color(0, 0, 255), pixels.Color(0, 0, 50), 10000);
+    } else if (demoElapsedTime < 20000) {
+      setPixelsFade(temporal, pixels.Color(0, 255, 0), pixels.Color(0, 50, 0), 10000);
+    } else {
+      setPixelsFade(parietal, pixels.Color(255, 0, 0), pixels.Color(50, 0, 0), 10000);
+      // Reset the demo mode timer when all zones have been displayed
+      if (demoElapsedTime >= 30000) {
+        demoStartTime = 0;
+      }
     }
   }
 }
