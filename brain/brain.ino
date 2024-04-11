@@ -1,3 +1,11 @@
+/**
+This Arduino script controls a NeoPixel ring to simulate the activity of different brain zones. 
+It implements a gradual transition between different colors for the parietal, frontal, and temporal zones of the brain, creating a smooth and visually engaging representation of brain activity. 
+The script defines functions to set pixels with gradual color transitions, allowing for customizable and dynamic lighting patterns reflecting the simulated brain activity.
+
+**/
+
+
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
