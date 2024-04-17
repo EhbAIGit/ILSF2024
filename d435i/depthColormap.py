@@ -37,7 +37,7 @@ def main():
         depth_visualized = cv2.cvtColor(clipped_depth_image.astype(np.uint8), cv2.COLOR_GRAY2BGR)
 
         # Make points with distance greater than 30 cm black
-        depth_visualized[clipped_depth_image > 300] = [0, 0, 0]
+        depth_visualized[clipped_depth_image > 1000] = [0, 0, 0]
 
 
         # Draw a rectangle around the cropped area
