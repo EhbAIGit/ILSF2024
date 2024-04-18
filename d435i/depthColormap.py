@@ -31,7 +31,7 @@ def main():
         cropped_depth_image = depth_image[40:540, 70:570]
 
         # Clip depth values between 20 cm and 1 meter
-        clipped_depth_image = np.clip(cropped_depth_image, 200, 1000)  # Depth values are in millimeters
+        clipped_depth_image = np.clip(cropped_depth_image, 200, 650)  # Depth values are in millimeters
 
         # Create a copy of the clipped depth image for visualization
         depth_visualized = cv2.cvtColor(clipped_depth_image.astype(np.uint8), cv2.COLOR_GRAY2BGR)
