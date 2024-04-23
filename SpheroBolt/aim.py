@@ -5,7 +5,7 @@ from spherov2.types import Color
 
 # Zoek en verbind met deq Sphero robot
 
-toy = scanner.find_toy(toy_name='SB-B72B')
+toy = scanner.find_toy(toy_name='SB-1D86')
 with SpheroEduAPI(toy) as droid:
     heading = 0
     droid.set_back_led(Color(0, 255, 0))

@@ -4,7 +4,7 @@ from spherov2 import scanner
 from spherov2.types import Color
 
 # Replace 'SPECIFIC_MAC_ADDRESS' with the MAC address of your Sphero Bolt
-specific_mac_address = 'F4:02:39:51:2C:26'
+specific_mac_address = 'EB:C9:20:08:1D:86'
 
 # Zoek en verbind met de Sphero robot met het opgegeven MAC-adres
 toy = scanner.find_toy(mac=specific_mac_address)
