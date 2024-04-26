@@ -1,6 +1,8 @@
 /*
 CONNECT 
 
+Updated :  25/04/2024
+
 servo to pwm channel 0  (red=5V,  black, GND and yellow signal)
 Analog out from XARM controller to A0,  GND from XARM controller to GND
 green wire to pin 9 on pwm shield (digital pin 2 on arduino)  (This is the switch on 2 sides of gripper.)
