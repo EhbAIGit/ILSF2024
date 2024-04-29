@@ -21,6 +21,33 @@ import threading
 
 import pygame
 
+
+XarmInitialX = 250
+XarmInitialY = 0
+XarmInitialZ = 260
+
+XarmMaxX = 430
+XarmMinX = -430
+XarmMaxY = 410
+XarmMinY = -405
+XarmMinZ = 260
+XarmMaxZ = 550
+
+
+lastX = XarmInitialX
+lastY = XarmInitialY
+lastZ = XarmInitialZ
+
+
+
+XarmCurrentX = XarmInitialX
+XarmCurrentY = XarmInitialY
+XarmCurrentZ = XarmInitialZ
+
+
+
+
+
 # Initialiseer pygame en de joystick
 pygame.init()
 pygame.joystick.init()
@@ -106,31 +133,89 @@ arm.register_connect_changed_callback(connect_changed_callback)
 
 if arm.error_code == 0 and not params['quit']:
 
+    code = arm.set_position(*[XarmInitialX, XarmInitialY, XarmInitialZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)
+
 
     try:
         while True:
             pygame.event.pump()
 
+            
+
             # Lees de invoer van de joystick uit
-            y_axis = joystick.get_axis(0)*-1  # X-as
-            x_axis = joystick.get_axis(1)*-1  # Y-as
-            z_axis = joystick.get_axis(2)  # Z-as (Trust)
+            y2_axis = joystick.get_axis(0)  
+            y_axis = joystick.get_axis(2)*-1  # X-as
+            x_axis = joystick.get_axis(3)*-1  # Y-as
             Buttons = [joystick.get_button(0),joystick.get_button(1),joystick.get_button(2),joystick.get_button(3)]
             Thumb_x = joystick.get_hat(0)[0]
             Thumb_y = joystick.get_hat(0)[1]
             # Print de joystickgegevens
-            #print("X-as: {:.2f}, Y-as: {:.2f}, Z-as (Trust): {:.2f}, Button3:{}, Hat(x-y):{}-{}".format(x_axis, y_axis, z_axis,Buttons,Thumb_x, Thumb_y))
+            #print("X-as: {:.2f}, Y-as: {:.2f}, Button3:{}, Hat(x-y):{}-{}".format(x_axis, y_axis,y2_axis,Buttons,Thumb_x, Thumb_y))
 
-            maxX = 350
-            maxY = 350
-            Xpos = int(maxX*x_axis)
-            Ypos = int(maxY*y_axis)
-            if (Ypos > -100 and Ypos < 100 and Xpos <184) :
-                Xpos = 184
-            #print (Xpos)
-            time.sleep(0.1)
-            code = arm.set_position(*[Xpos, Ypos, 300, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)
+            if (x_axis>0.1) :  
+                XarmCurrentX = XarmCurrentX + abs(x_axis*100)
+                if (XarmCurrentX > XarmMaxX ) : 
+                    XarmCurrentX = XarmCurrentX - abs(x_axis*100)
+            if (x_axis<-0.1) :  
+                XarmCurrentX = XarmCurrentX - abs(x_axis*100)
+                if (XarmCurrentX < XarmMinX ) : 
+                    XarmCurrentX = XarmCurrentX + abs(x_axis*100)
+            if (y_axis>0.1) :  
+                XarmCurrentY = XarmCurrentY + abs(y_axis*100)
+                if (XarmCurrentY > XarmMaxY ) : 
+                    XarmCurrentY = XarmCurrentY - abs(y_axis*100)
+            if (y_axis<-0.1) :  
+                XarmCurrentY = XarmCurrentY - abs(y_axis*100)
+                if (XarmCurrentY < XarmMinY ) : 
+                    XarmCurrentY = XarmCurrentY + abs(y_axis*100)
+            if (Thumb_y==-1) :  
+                XarmCurrentZ = XarmCurrentZ - 10
+                if (XarmCurrentZ < XarmMinZ ) : 
+                    XarmCurrentZ = XarmMinZ
+            if (Thumb_y==1) :  
+                XarmCurrentZ = XarmCurrentZ + 10
+                if (XarmCurrentZ > XarmMaxZ ) : 
+                    XarmCurrentZ = XarmMaxZ
 
+            if (Buttons[0] == 1) :
+                code = arm.set_cgpio_analog(0, 5)
+            elif (Buttons[3] == 1):
+                code = arm.set_cgpio_analog(0, 0)
+            if (Buttons[1] == 1) :
+                code = arm.playback_trajectory(times=1, filename='exterior_pattern', wait=True)           
+            if (Buttons[2] == 1) :
+                code = arm.set_position(*[XarmInitialX, XarmInitialY, XarmInitialZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
+            
+            if (y2_axis > 0.5) :
+                current_angles = arm.get_servo_angle()
+                currentAngle = current_angles[1][5] - 10
+                current_angles[1][5] = currentAngle
+                if (current_angles[1][5] < -46 ) :
+                    current_angles[1][5] = -46
+                code = arm.set_servo_angle(angle=current_angles[1], speed=params['angle_speed'], mvacc=params['angle_acc'], wait=True, radius=-1.0)
+            if (y2_axis < -0.5) :
+                current_angles = arm.get_servo_angle()
+                currentAngle = current_angles[1][5] + 10
+                current_angles[1][5] = currentAngle
+                if (current_angles[1][5] > 46 ) :
+                    current_angles[1][5] = 46
+                code = arm.set_servo_angle(angle=current_angles[1], speed=params['angle_speed'], mvacc=params['angle_acc'], wait=True, radius=-1.0)
+
+
+            
+        
+            if (lastX != XarmCurrentX or lastY!= XarmCurrentY or lastZ!= XarmCurrentZ) : 
+                #print ("new X-as: {} Y-As: {}, Z-As: {} ".format(XarmCurrentX,XarmCurrentY,XarmCurrentZ))
+                #print ("new X-as: {}".format(XarmCurrentX))
+                code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)
+                
+            lastX = XarmCurrentX
+            lastY = XarmCurrentY
+            lastZ = XarmCurrentZ 
+
+            current_angles = arm.get_servo_angle()
+            #print (current_angles)
+            #time.sleep(0.25) 
 
 
     except KeyboardInterrupt:
@@ -139,7 +224,7 @@ if arm.error_code == 0 and not params['quit']:
 
 
     #code = arm.set_position(*[350.0, 0.0, 300, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)
-    time.sleep(1)
+    #time.sleep(1)
 
     if code != 0:
         params['quit'] = True
