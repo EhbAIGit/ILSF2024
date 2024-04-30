@@ -18,6 +18,7 @@ import datetime
 import random
 import traceback
 import threading
+import subprocess
 
 import pygame
 
@@ -179,11 +180,19 @@ if arm.error_code == 0 and not params['quit']:
 
             if (Buttons[0] == 1) :
                 code = arm.set_cgpio_analog(0, 5)
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_1.mp3"])
+                time.sleep(2)
             elif (Buttons[3] == 1):
                 code = arm.set_cgpio_analog(0, 0)
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_2.mp3"])
+                time.sleep(2)
             if (Buttons[1] == 1) :
-                code = arm.playback_trajectory(times=1, filename='exterior_pattern', wait=True)           
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\BASIC2_EN_sentence_1.mp3","7"])
+                code = arm.playback_trajectory(times=1, filename='exterior_pattern', wait=True)
+                print("Yes, indeed")
+                        
             if (Buttons[2] == 1) :
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\MOVE_BASE_EN_sentence_1.mp3"])  
                 code = arm.set_position(*[XarmInitialX, XarmInitialY, XarmInitialZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
             
             if (y2_axis > 0.5) :

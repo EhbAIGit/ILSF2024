@@ -18,7 +18,7 @@ import datetime
 import random
 import traceback
 import threading
-
+import subprocess
 import pygame
 
 
@@ -99,9 +99,16 @@ def connect_changed_callback(data):
         arm.release_connect_changed_callback(error_warn_change_callback)
 arm.register_connect_changed_callback(connect_changed_callback)
 
+subprocess.Popen(['python', '../playmp3.py', '../XarmVoices\Control_EN_sentence_1.mp3'])
+
 if arm.error_code == 0 and not params['quit']:
 
+    
+
     try:
+
+        spoken = False
+
         while True:
             current_angles = arm.get_servo_angle()
             current_positions = arm.get_position()
@@ -111,12 +118,25 @@ if arm.error_code == 0 and not params['quit']:
             currentX = current_positions[1][0]
             currentZ = current_positions[1][2]
 
+            errorMessage = ""
 
 
-            if (currentY > -170  and  currentY < 170 and currentX < 150 and  currentX > -250 ) :
-                print ("Danger for Collission with center!")
-                print(current_positions)
-
+            if (currentY > XarmMaxY-20 or currentY < XarmMinY+20 or currentX > XarmMaxX-20 or currentX < XarmMinX+20) :
+                errorMessage = "../XarmVoices\Control_EN_sentence_2.mp3"
+            if (currentY > -170  and  currentY < 170 and currentX < 200 and  currentX > -250 ) :
+                errorMessage = "../XarmVoices\BASIC_EN_sentence_1.mp3"
+            if (currentZ < XarmMinZ+10):
+                errorMessage = "../XarmVoices\Control_EN_sentence_5.mp3"
+            if (currentZ > XarmMaxZ-10):
+                errorMessage = "../XarmVoices\Control_EN_sentence_4.mp3"
+ 
+            if (errorMessage != "" and spoken == False) :
+                subprocess.Popen(['python', '../playmp3.py', errorMessage])
+                spoken = True
+            
+            if (spoken == True and errorMessage == "") :
+                spoken = False
+           
             time.sleep(0.1)
 
 
