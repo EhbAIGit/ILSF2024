@@ -30,7 +30,7 @@ XarmMaxX = 430
 XarmMinX = -430
 XarmMaxY = 410
 XarmMinY = -405
-XarmMinZ = 260
+XarmMinZ = 210
 XarmMaxZ = 550
 
 
