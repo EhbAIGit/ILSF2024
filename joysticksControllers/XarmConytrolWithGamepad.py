@@ -29,8 +29,8 @@ XarmInitialZ = 260
 
 XarmMaxX = 430
 XarmMinX = -430
-XarmMaxY = 410
-XarmMinY = -405
+XarmMaxY = 425
+XarmMinY = -420
 XarmMinZ = 210
 XarmMaxZ = 550
 
@@ -181,11 +181,11 @@ if arm.error_code == 0 and not params['quit']:
             if (Buttons[0] == 1) :
                 code = arm.set_cgpio_analog(0, 5)
                 subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_1.mp3"])
-                time.sleep(2)
+                time.sleep(1)
             elif (Buttons[3] == 1):
                 code = arm.set_cgpio_analog(0, 0)
                 subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_2.mp3"])
-                time.sleep(2)
+                time.sleep(1)
             if (Buttons[1] == 1) :
                 subprocess.Popen(['python', 'playmp3.py', "XarmVoices\BASIC2_EN_sentence_1.mp3","7"])
                 code = arm.playback_trajectory(times=1, filename='exterior_pattern', wait=True)
