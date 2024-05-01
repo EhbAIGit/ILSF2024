@@ -25,12 +25,12 @@ import pygame
 
 XarmInitialX = 250
 XarmInitialY = 0
-XarmInitialZ = 260
+XarmInitialZ = 330
 
 XarmMaxX = 430
 XarmMinX = -430
-XarmMaxY = 425
-XarmMinY = -420
+XarmMaxY = 430
+XarmMinY = -430
 XarmMinZ = 210
 XarmMaxZ = 550
 
@@ -44,6 +44,8 @@ lastZ = XarmInitialZ
 XarmCurrentX = XarmInitialX
 XarmCurrentY = XarmInitialY
 XarmCurrentZ = XarmInitialZ
+
+catch1 = [396.9,429.7,260,180,0,0]
 
 
 
@@ -147,7 +149,7 @@ if arm.error_code == 0 and not params['quit']:
             y2_axis = joystick.get_axis(0)  
             y_axis = joystick.get_axis(2)*-1  # X-as
             x_axis = joystick.get_axis(3)*-1  # Y-as
-            Buttons = [joystick.get_button(0),joystick.get_button(1),joystick.get_button(2),joystick.get_button(3)]
+            Buttons = [joystick.get_button(0),joystick.get_button(1),joystick.get_button(2),joystick.get_button(3),joystick.get_button(4),joystick.get_button(5),joystick.get_button(6),joystick.get_button(7),joystick.get_button(8),joystick.get_button(9),joystick.get_button(10)]
             Thumb_x = joystick.get_hat(0)[0]
             Thumb_y = joystick.get_hat(0)[1]
             # Print de joystickgegevens
@@ -192,9 +194,26 @@ if arm.error_code == 0 and not params['quit']:
                 print("Yes, indeed")
                         
             if (Buttons[2] == 1) :
-                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\MOVE_BASE_EN_sentence_1.mp3"])  
-                code = arm.set_position(*[XarmInitialX, XarmInitialY, XarmInitialZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
-            
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\MOVE_BASE_EN_sentence_1.mp3"])
+                XarmCurrentX = XarmInitialX
+                XarmCurrentY= XarmInitialY
+                XarmCurrentZ = XarmInitialZ
+                code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
+
+            if (Buttons[6] == 1) :
+                XarmCurrentX = catch1[0]
+                XarmCurrentY= catch1[1]
+                XarmCurrentZ = catch1[2]
+                code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
+
+            if (Buttons[4] == 1) :
+                XarmCurrentZ = 215
+                code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
+                code = arm.set_cgpio_analog(0, 5)
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_1.mp3"])
+                time.sleep(1)
+
+
             if (y2_axis > 0.5) :
                 current_angles = arm.get_servo_angle()
                 currentAngle = current_angles[1][5] - 10
