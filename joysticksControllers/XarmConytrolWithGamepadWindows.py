@@ -147,16 +147,14 @@ if arm.error_code == 0 and not params['quit']:
 
             # Lees de invoer van de joystick uit
             y2_axis = joystick.get_axis(0)  
-            y_axis = joystick.get_axis(3)*-1  # X-as
-            x_axis = joystick.get_axis(4)*-1  # Y-as
+            y_axis = joystick.get_axis(2)*-1  # X-as
+            x_axis = joystick.get_axis(3)*-1  # Y-as
             Buttons = [joystick.get_button(0),joystick.get_button(1),joystick.get_button(2),joystick.get_button(3),joystick.get_button(4),joystick.get_button(5),joystick.get_button(6),joystick.get_button(7),joystick.get_button(8),joystick.get_button(9),joystick.get_button(10)]
             Thumb_x = joystick.get_hat(0)[0]
             Thumb_y = joystick.get_hat(0)[1]
             # Print de joystickgegevens
             #print("X-as: {:.2f}, Y-as: {:.2f}, Button3:{}, Hat(x-y):{}-{}".format(x_axis, y_axis,y2_axis,Buttons,Thumb_x, Thumb_y))
-            #time.sleep(0.1)
-            #continue
-        
+
             if (x_axis>0.1) :  
                 XarmCurrentX = XarmCurrentX + abs(x_axis*100)
                 if (XarmCurrentX > XarmMaxX ) : 
@@ -184,19 +182,19 @@ if arm.error_code == 0 and not params['quit']:
 
             if (Buttons[0] == 1) :
                 code = arm.set_cgpio_analog(0, 5)
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/GRIPPER_EN_sentence_1.mp3"])
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_1.mp3"])
                 time.sleep(1)
             elif (Buttons[3] == 1):
                 code = arm.set_cgpio_analog(0, 0)
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/GRIPPER_EN_sentence_2.mp3"])
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_2.mp3"])
                 time.sleep(1)
             if (Buttons[1] == 1) :
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/BASIC2_EN_sentence_1.mp3","7"])
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\BASIC2_EN_sentence_1.mp3","7"])
                 code = arm.playback_trajectory(times=1, filename='exterior_pattern', wait=True)
                 print("Yes, indeed")
                         
             if (Buttons[2] == 1) :
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/MOVE_BASE_EN_sentence_1.mp3"])
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\MOVE_BASE_EN_sentence_1.mp3"])
                 XarmCurrentX = XarmInitialX
                 XarmCurrentY= XarmInitialY
                 XarmCurrentZ = XarmInitialZ
@@ -212,7 +210,7 @@ if arm.error_code == 0 and not params['quit']:
                 XarmCurrentZ = 215
                 code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
                 code = arm.set_cgpio_analog(0, 5)
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/GRIPPER_EN_sentence_1.mp3"])
+                subprocess.Popen(['python', 'playmp3.py', "XarmVoices\GRIPPER_EN_sentence_1.mp3"])
                 time.sleep(1)
 
 
