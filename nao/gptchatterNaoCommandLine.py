@@ -58,7 +58,8 @@ nao.subscribe('NAO/DONE')
 
 speakWithNao = True
 
-OPENAI_KEY = ''
+keyfile = open("openaikey.txt",'r')
+OPENAI_KEY = keyfile.read()
 
 
 # PARSER METHODS

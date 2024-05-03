@@ -15,6 +15,12 @@ import nltk
 from nltk.tokenize import sent_tokenize
 import os
 import yaml
+#  speech to text
+import sounddevice as sd
+import tempfile
+from scipy.io import wavfile
+from scipy.io.wavfile import write
+
 #from server_module import create_server_socket, accept_connection, receive_message, send_response, close_server_connection
 
 
@@ -57,8 +63,67 @@ nao.connect(MQTT_BROKER, MQTT_PORT, 60)
 nao.subscribe('NAO/DONE')
 
 speakWithNao = True
+keyfile = open("openaikey.txt",'r')
+OPENAI_KEY = keyfile.read()
 
-OPENAI_KEY = ''
+# start  Speech to text
+
+def rms(frame):
+    """
+    Bereken de root mean square van de audio frame.
+    """
+    return np.sqrt(np.mean(np.square(frame), axis=0))
+
+def record_until_silence(threshold=0.015, fs=44100, chunk_size=1024, max_silence=5):
+    """
+    Neemt audio op zolang er geluid is boven een bepaalde drempelwaarde en stopt na een bepaalde periode van stilte.
+    :param threshold: De drempelwaarde voor het volume om te stoppen met opnemen.
+    :param fs: Samplefrequentie.
+    :param chunk_size: Het aantal samples per frame.
+    :param max_silence: Maximale tijd in seconden om te wachten tijdens stilte voordat de opname stopt.
+    :return: Pad naar het opgeslagen audiobestand.
+    """
+    print("Begin met opnemen... Spreek nu.")
+    recorded_frames = []
+    silent_frames = 5
+    silence_limit = int(max_silence * fs / chunk_size)  # Aantal frames van stilte voordat opname stopt
+    recording_started = False
+
+    def callback(indata, frames, time, status):
+        nonlocal silent_frames, recording_started
+        volume_norm = rms(indata)
+        if volume_norm < threshold:
+            silent_frames += 1
+            if silent_frames > silence_limit:
+                raise sd.CallbackStop
+        else:
+            silent_frames = 0
+            recording_started =  True
+        
+        recorded_frames.append(indata.copy())
+
+    with sd.InputStream(callback=callback, device=1, dtype='float32', channels=1, samplerate=fs, blocksize=chunk_size):
+        print("Opname gestart. Wacht op geluid...")
+        sd.sleep(5000)  # Wacht maximaal 10 seconden voor geluid
+
+
+    if (recording_started == False ) :
+        print("\nGeen vraag waargenomen.")
+        return 0
+    else:
+        print("Einde van de opname. Even geduld aub.")
+        recording = np.concatenate(recorded_frames, axis=0)
+        # Tijdelijk bestand aanmaken en opname opslaan
+        temp_file = tempfile.mktemp(prefix='opgenomen_audio_', suffix='.wav')
+        write(temp_file, fs, recording)  # Schrijf de opname naar een WAV-bestand
+
+        #print(f"Audio opgenomen en opgeslagen in: {temp_file}")
+        return temp_file
+
+
+# end Speech to text
+
+
 
 
 # PARSER METHODS
@@ -183,7 +248,27 @@ while True:
     # Opname starten
 
     if (firstCall != True) :
-        user_input = input("Your message: ")
+        user_input = input("Press enter to speak")
+
+        audio_file_path = record_until_silence()
+        
+        
+        if (audio_file_path == 0) :
+            continue
+
+
+        #start_time = time.perf_counter()  # Precieze starttijd
+        #subprocess.Popen(['python', 'playmp3.py', 'waiting\zeerLangWachten.mp3'])
+        #toWait = 5
+
+
+        with open(audio_file_path, "rb") as audio_file:
+            user_input = client.audio.transcriptions.create(
+            model="whisper-1", 
+            file=audio_file
+            )
+        # Check if the user wants to exit the chat
+        user_input = user_input.text
     else :
         firstCall = False
         user_input = "Ok, now I ask a question, and you produce an answer with these gestures in braces. Speak normal English."
