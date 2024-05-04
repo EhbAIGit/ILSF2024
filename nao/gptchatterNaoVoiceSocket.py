@@ -15,7 +15,44 @@ import nltk
 from nltk.tokenize import sent_tokenize
 import os
 import yaml
+#  speech to text
+import sounddevice as sd
+import tempfile
+from scipy.io import wavfile
+from scipy.io.wavfile import write
+
 #from server_module import create_server_socket, accept_connection, receive_message, send_response, close_server_connection
+import socket
+
+
+def create_server_socket(host, port):
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(5)
+    return server_socket
+
+def accept_connection(server_socket):
+    conn, address = server_socket.accept()
+    return conn, address
+
+def receive_message(conn):
+    return conn.recv(1024).decode()
+
+def send_response(conn, message):
+    conn.send(message.encode())
+
+def close_server_connection(conn):
+    conn.close()
+
+
+
+host = socket.gethostname()
+port = 5000
+
+print("Starting server...")
+server_socket = create_server_socket(host, port)
+conn, address = accept_connection(server_socket)
+print("Connection from: " + str(address))
 
 
 # Define the MQTT server details
@@ -54,12 +91,76 @@ nao.on_message = on_message
 # Connect to the MQTT broker
 nao.connect(MQTT_BROKER, MQTT_PORT, 60)
 
+nao.publish("NAO/LANGUAGE", "NL")
+nao.publish("NAO/POSTURE", "Stand")
+
+
+
 nao.subscribe('NAO/DONE')
 
 speakWithNao = True
-
 keyfile = open("openaikey.txt",'r')
 OPENAI_KEY = keyfile.read()
+
+# start  Speech to text
+
+def rms(frame):
+
+    """
+    Bereken de root mean square van de audio frame.
+    """
+    return np.sqrt(np.mean(np.square(frame), axis=0))
+
+def record_until_silence(threshold=0.015, fs=44100, chunk_size=1024, max_silence=5):
+    """
+    Neemt audio op zolang er geluid is boven een bepaalde drempelwaarde en stopt na een bepaalde periode van stilte.
+    :param threshold: De drempelwaarde voor het volume om te stoppen met opnemen.
+    :param fs: Samplefrequentie.
+    :param chunk_size: Het aantal samples per frame.
+    :param max_silence: Maximale tijd in seconden om te wachten tijdens stilte voordat de opname stopt.
+    :return: Pad naar het opgeslagen audiobestand.
+    """
+    print("Begin met opnemen... Spreek nu.")
+    recorded_frames = []
+    silent_frames = 5
+    silence_limit = int(max_silence * fs / chunk_size)  # Aantal frames van stilte voordat opname stopt
+    recording_started = False
+
+    def callback(indata, frames, time, status):
+        nonlocal silent_frames, recording_started
+        volume_norm = rms(indata)
+        if volume_norm < threshold:
+            silent_frames += 1
+            if silent_frames > silence_limit:
+                raise sd.CallbackStop
+        else:
+            silent_frames = 0
+            recording_started =  True
+        
+        recorded_frames.append(indata.copy())
+
+    with sd.InputStream(callback=callback, device=1, dtype='float32', channels=1, samplerate=fs, blocksize=chunk_size):
+        print("Opname gestart. Wacht op geluid...")
+        sd.sleep(5000)  # Wacht maximaal 10 seconden voor geluid
+
+
+    if (recording_started == False ) :
+        print("\nGeen vraag waargenomen.")
+        return 0
+    else:
+        print("Einde van de opname. Even geduld aub.")
+        recording = np.concatenate(recorded_frames, axis=0)
+        # Tijdelijk bestand aanmaken en opname opslaan
+        temp_file = tempfile.mktemp(prefix='opgenomen_audio_', suffix='.wav')
+        write(temp_file, fs, recording)  # Schrijf de opname naar een WAV-bestand
+
+        #print(f"Audio opgenomen en opgeslagen in: {temp_file}")
+        return temp_file
+
+
+# end Speech to text
+
+
 
 
 # PARSER METHODS
@@ -83,7 +184,7 @@ def load_gestures():
 
 def tokenize_sentences(text):
     # Download the Punkt tokenizer models (only needs to be done once)
-    nltk.download('punkt')
+    # nltk.download('punkt')
 
     # Use NLTK's sent_tokenize to split text into sentences
     sentences = sent_tokenize(text)
@@ -157,6 +258,7 @@ load_gestures()
 
 # End Parser Methods
 
+
 client = OpenAI(api_key=OPENAI_KEY)
 
 # Initial system message to set the context for the chat
@@ -184,7 +286,27 @@ while True:
     # Opname starten
 
     if (firstCall != True) :
-        user_input = input("Your message: ")
+        user_input = input("Press enter to speak")
+
+        audio_file_path = record_until_silence()
+        
+        
+        if (audio_file_path == 0) :
+            continue
+
+
+        #start_time = time.perf_counter()  # Precieze starttijd
+        #subprocess.Popen(['python', 'playmp3.py', 'waiting\zeerLangWachten.mp3'])
+        #toWait = 5
+
+
+        with open(audio_file_path, "rb") as audio_file:
+            user_input = client.audio.transcriptions.create(
+            model="whisper-1", 
+            file=audio_file
+            )
+        # Check if the user wants to exit the chat
+        user_input = user_input.text
     else :
         firstCall = False
         user_input = "Ok, now I ask a question, and you produce an answer with these gestures in braces. Speak normal English."
@@ -225,7 +347,11 @@ while True:
             parsed_sentence = replace_bracket_contents(sentence)
             parsed_text += parsed_sentence + "\n"
         print (parsed_text)
-        nao.publish(MQTT_TOPIC, parsed_text)
+        #nao.publish(MQTT_TOPIC, parsed_text)
+
+        send_response(conn, parsed_text)
+
+        #nao.publish("NAO/POSTURE", "Stand")
     
     # Add model's response to the messages list to maintain context
     messages.append({"role": "assistant", "content": completion.choices[0].message.content})  # Corrected line

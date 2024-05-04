@@ -60,6 +60,11 @@ nao.on_message = on_message
 # Connect to the MQTT broker
 nao.connect(MQTT_BROKER, MQTT_PORT, 60)
 
+nao.publish("NAO/LANGUAGE", "NL")
+nao.publish("NAO/POSTURE", "Stand")
+
+
+
 nao.subscribe('NAO/DONE')
 
 speakWithNao = True
@@ -69,6 +74,7 @@ OPENAI_KEY = keyfile.read()
 # start  Speech to text
 
 def rms(frame):
+
     """
     Bereken de root mean square van de audio frame.
     """
@@ -147,7 +153,7 @@ def load_gestures():
 
 def tokenize_sentences(text):
     # Download the Punkt tokenizer models (only needs to be done once)
-    nltk.download('punkt')
+    # nltk.download('punkt')
 
     # Use NLTK's sent_tokenize to split text into sentences
     sentences = sent_tokenize(text)
@@ -220,6 +226,7 @@ def load_yaml(file_path):
 load_gestures()
 
 # End Parser Methods
+
 
 client = OpenAI(api_key=OPENAI_KEY)
 
@@ -310,6 +317,7 @@ while True:
             parsed_text += parsed_sentence + "\n"
         print (parsed_text)
         nao.publish(MQTT_TOPIC, parsed_text)
+        nao.publish("NAO/POSTURE", "Stand")
     
     # Add model's response to the messages list to maintain context
     messages.append({"role": "assistant", "content": completion.choices[0].message.content})  # Corrected line
