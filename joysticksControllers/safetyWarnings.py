@@ -25,8 +25,8 @@ import pygame
 
 XarmMaxX = 430
 XarmMinX = -430
-XarmMaxY = 410
-XarmMinY = -410
+XarmMaxY = 415
+XarmMinY = -415
 XarmMinZ = 210
 XarmMaxZ = 550
 
