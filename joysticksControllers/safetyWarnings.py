@@ -22,7 +22,7 @@ import subprocess
 import pygame
 
 
-#  Be carefull when changing these values.  It can cause crashing the Xarm or gripper
+#  Be carefull when changing these values.
 XarmMaxX = 430
 XarmMinX = -430
 XarmMaxY = 415
