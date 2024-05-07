@@ -29,7 +29,7 @@ XarmInitialZ = 330
 
 XarmMaxX = 430
 XarmMinX = -430
-XarmMaxY = 430
+XarmMaxY = 445
 XarmMinY = -430
 XarmMinZ = 210
 XarmMaxZ = 550
@@ -45,7 +45,7 @@ XarmCurrentX = XarmInitialX
 XarmCurrentY = XarmInitialY
 XarmCurrentZ = XarmInitialZ
 
-catch1 = [396.9,429.7,260,180,0,0]
+catch1 = [388.3,441.4,300,180,0,0]
 
 
 
@@ -207,6 +207,11 @@ if arm.error_code == 0 and not params['quit']:
                 XarmCurrentY= catch1[1]
                 XarmCurrentZ = catch1[2]
                 code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
+
+            if (Buttons[7] == 1) :
+                XarmCurrentZ = 240
+                code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
+
 
             if (Buttons[4] == 1) :
                 XarmCurrentZ = 215

@@ -32,7 +32,7 @@ class SpheroController:
 
     def discover_toy(self):
         try:
-            self.toy = scanner.find_toy(toy_name="SB-2C26")
+            self.toy = scanner.find_toy(toy_name="SB-24D3")
             print("Sphero toy discovered.")
         except Exception as e:
             print(f"Error discovering toy: {e}")

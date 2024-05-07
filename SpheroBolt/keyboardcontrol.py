@@ -4,7 +4,7 @@ from spherov2 import scanner
 import time
 
 # Zoek en verbind met de Sphero robot
-toy = scanner.find_toy(toy_name='SB-1D86')
+toy = scanner.find_toy(toy_name='SB-24D3')
 with SpheroEduAPI(toy) as droid:
     
     print("Gebruik de pijltjestoetsen om te bewegen. Druk op 'q' om af te sluiten.")
