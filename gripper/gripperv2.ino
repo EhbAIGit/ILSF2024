@@ -38,6 +38,9 @@ void setup() {
   pwm.setPWMFreq(SERVO_FREQ);  // Zet de PWM frequentie op 50Hz
 
   pinMode(switchPin1, INPUT_PULLUP);
+  pinMode(9, OUTPUT);
+
+  digitalWrite(9,HIGH);
 }
 
 void loop() {
@@ -46,13 +49,20 @@ void loop() {
 
   // Als sensorwaarde groter is dan 800, open de servo
   if (sensorValue < 600  && status == "CLOSE") {
+    digitalWrite(9,LOW);
+    delay(100);
      pwm.setPWM(0, 0, SERVOMIN); // Volledig open positie
      Serial.println("OPENED");
      status="OPEN";
+    delay(1500);
+    digitalWrite(9,HIGH);
+
 
   }
   // Als sensorwaarde kleiner is dan 200, en switchPin1 niet geactiveerd is, sluit de servo
   if (sensorValue > 800 && digitalRead(switchPin1) == HIGH  && status == "OPEN") {
+    digitalWrite(9,LOW);
+    delay(100);
     for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {
       pwm.setPWM(0, 0, pulselen);
       delay(5); // Langzaam dichtgaan
@@ -60,16 +70,20 @@ void loop() {
       if (digitalRead(switchPin1) == LOW) {
         Serial.println("OBJECT_CATCHED");
         objectCatched = true;
-        //break; // Stop de sluiting als switchPin1 wordt geactiveerd
+        break; // Stop de sluiting als switchPin1 wordt geactiveerd
       }
       status="CLOSE";
     }
     if (!objectCatched) {
       Serial.println("CLOSED");
     }
+    delay(250);
+    digitalWrite(9,HIGH);
+
   }
 
   if (Serial.available() > 0) {
+    
     String command = Serial.readString();
 
     if (command.startsWith("stand")) {
