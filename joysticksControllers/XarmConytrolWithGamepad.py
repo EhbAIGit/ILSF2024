@@ -27,10 +27,10 @@ XarmInitialX = 250
 XarmInitialY = 0
 XarmInitialZ = 330
 
-XarmMaxX = 430
-XarmMinX = -430
-XarmMaxY = 445
-XarmMinY = -430
+XarmMaxX = 421.2
+XarmMinX = -414.8
+XarmMaxY = 464.3
+XarmMinY = -411.3
 XarmMinZ = 210
 XarmMaxZ = 550
 
@@ -46,6 +46,8 @@ XarmCurrentY = XarmInitialY
 XarmCurrentZ = XarmInitialZ
 
 catch1 = [388.3,441.4,300,180,0,0]
+
+traject1 = [(200,0),(200,-400),(300,-400),(300,0),(400,0),(400,400),(300,400),(300,0),(200,0),(200,400),(-200,400),(-200,200),(-300,400),(400,400)]
 
 
 
@@ -194,13 +196,19 @@ if arm.error_code == 0 and not params['quit']:
                 subprocess.Popen(['python', './playmp3.py', "./XarmVoices/BASIC2_EN_sentence_1.mp3","7"])
                 code = arm.playback_trajectory(times=1, filename='exterior_pattern', wait=True)
                 print("Yes, indeed")
-                        
-            if (Buttons[2] == 1) :
+
+            if (Buttons[8] == 1) :
                 subprocess.Popen(['python', './playmp3.py', "./XarmVoices/MOVE_BASE_EN_sentence_1.mp3"])
                 XarmCurrentX = XarmInitialX
                 XarmCurrentY= XarmInitialY
                 XarmCurrentZ = XarmInitialZ
                 code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
+
+
+            if (Buttons[2] == 1) :
+
+                for coordinates in traject1 :
+                    code = arm.set_position(*[coordinates[0], coordinates[1], 300, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
 
             if (Buttons[6] == 1) :
                 XarmCurrentX = catch1[0]
