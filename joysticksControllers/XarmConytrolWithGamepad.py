@@ -136,6 +136,12 @@ def connect_changed_callback(data):
         arm.release_connect_changed_callback(error_warn_change_callback)
 arm.register_connect_changed_callback(connect_changed_callback)
 
+def play_sound(mediaFile, time=None):
+    if time:
+        subprocess.Popen(['python', './playmp3.py',str(time)])
+    else:
+        subprocess.Popen(['python', './playmp3.py'])
+
 if arm.error_code == 0 and not params['quit']:
 
     code = arm.set_position(*[XarmInitialX, XarmInitialY, XarmInitialZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)
@@ -186,19 +192,19 @@ if arm.error_code == 0 and not params['quit']:
 
             if (Buttons[0] == 1) :
                 code = arm.set_cgpio_analog(0, 5)
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/GRIPPER_EN_sentence_1.mp3"])
+                play_sound("./XarmVoices/GRIPPER_EN_sentence_1.mp3")
                 time.sleep(1)
             elif (Buttons[3] == 1):
                 code = arm.set_cgpio_analog(0, 0)
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/GRIPPER_EN_sentence_2.mp3"])
+                play_sound("./XarmVoices/GRIPPER_EN_sentence_2.mp3")
                 time.sleep(1)
             if (Buttons[1] == 1) :
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/BASIC2_EN_sentence_1.mp3","7"])
+                play_sound("./XarmVoices/BASIC2_EN_sentence_1.mp3", 7)
                 code = arm.playback_trajectory(times=1, filename='exterior_pattern', wait=True)
                 print("Yes, indeed")
 
             if (Buttons[8] == 1) :
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/MOVE_BASE_EN_sentence_1.mp3"])
+                play_sound("./XarmVoices/MOVE_BASE_EN_sentence_1.mp3")
                 XarmCurrentX = XarmInitialX
                 XarmCurrentY= XarmInitialY
                 XarmCurrentZ = XarmInitialZ
@@ -225,7 +231,7 @@ if arm.error_code == 0 and not params['quit']:
                 XarmCurrentZ = 215
                 code = arm.set_position(*[XarmCurrentX, XarmCurrentY, XarmCurrentZ, 180.0, 0.0, 0.0], speed=params['speed'], mvacc=params['acc'], radius=-1.0, wait=True)          
                 code = arm.set_cgpio_analog(0, 5)
-                subprocess.Popen(['python', './playmp3.py', "./XarmVoices/GRIPPER_EN_sentence_1.mp3"])
+                play_sound("./XarmVoices/GRIPPER_EN_sentence_1.mp3")
                 time.sleep(1)
 
 
